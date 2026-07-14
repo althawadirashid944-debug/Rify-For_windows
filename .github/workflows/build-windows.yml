@@ -26,10 +26,15 @@ jobs:
           pip install PySide6
           pip install python-mpv
 
+      - name: Extract mpv
+        shell: pwsh
+        run: |
+          7z x Assets/mpv/mpv.7z -oAssets/mpv/extracted
+
       - name: Build Rify
         shell: pwsh
         run: |
-          pyinstaller --name Rify --windowed --collect-all PySide6 --add-data "mpv;mpv" main.py
+          pyinstaller --name Rify --windowed --collect-all PySide6 --add-data "Assets/mpv/extracted;mpv" main.py
 
       - name: Upload build
         uses: actions/upload-artifact@v4
