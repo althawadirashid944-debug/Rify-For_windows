@@ -26,7 +26,7 @@ jobs:
 
       - name: Build
         run: |
-          pyinstaller --name Rify --windowed ^
+          pyinstaller --name Rify --windowed --collect-all PySide6 --add-data "mpv;mpv" main.py
           --add-data "mpv;mpv" ^
           main.py
 
