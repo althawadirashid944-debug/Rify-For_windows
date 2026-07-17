@@ -4,17 +4,16 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 jobs:
-  build-windows:
+  build:
     runs-on: windows-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.13"
 
@@ -26,23 +25,39 @@ jobs:
           pip install PySide6
           pip install yt-dlp
           pip install python-mpv
+          pip install mutagen
+          pip install rapidfuzz
 
       - name: Extract mpv
         shell: pwsh
         run: |
           7z x Assets/mpv/mpv.7z -oAssets/mpv/extracted
 
-      - name: Build Rify
+      - name: Build
         shell: pwsh
         run: |
-          pyinstaller --name Rify --windowed --collect-all PySide6 --hidden-import yt_dlp --add-data "Assets/mpv/extracted;mpv" main.py
+          pyinstaller `
+            --name Rify `
+            --windowed `
+            --collect-all PySide6 `
+            --collect-all mutagen `
+            --collect-all rapidfuzz `
+            --hidden-import yt_dlp `
+            --hidden-import mpv `
+            --add-data "Assets/mpv/extracted;mpv" `
+            main.py
 
-      - name: Compress build
+      - name: Verify build
         shell: pwsh
         run: |
-          Compress-Archive -Path dist/Rify -DestinationPath Rify-Windows.zip
+          Get-ChildItem dist/Rify
 
-      - name: Upload build
+      - name: Zip build
+        shell: pwsh
+        run: |
+          Compress-Archive -Path dist/Rify/* -DestinationPath Rify-Windows.zip
+
+      - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: Rify-Windows
